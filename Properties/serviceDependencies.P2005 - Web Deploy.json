@@ -1,3 +1,14 @@
 {
-  "dependencies": {}
+  "dependencies": {
+    "identityapp1": {
+      "connectionInfo": "App registration: P2005, Tenant: Default Directory (simonbunyagmail.onmicrosoft.com - Microsoft Entra ID)",
+      "type": "identityapp.default"
+    },
+    "mssql1": {
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/unep-staff-p2005/databases/p2005-db",
+      "type": "mssql.azure",
+      "connectionId": "ConnectionStrings:AZURE_SQL_CONNECTIONSTRING"
+    }
+  }
 }

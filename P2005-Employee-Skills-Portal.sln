@@ -5,6 +5,8 @@ VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2005-Employee-Skills-Portal", "P2005-Employee-Skills-Portal.csproj", "{5A196D8B-A40E-4270-9099-6C698EF24C9F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2005-API Staff App", "..\P2005-API Staff App\P2005-API Staff App.csproj", "{7026C0C3-5B82-4CB0-9F38-1AD0DB5D8738}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{5A196D8B-A40E-4270-9099-6C698EF24C9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A196D8B-A40E-4270-9099-6C698EF24C9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5A196D8B-A40E-4270-9099-6C698EF24C9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7026C0C3-5B82-4CB0-9F38-1AD0DB5D8738}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7026C0C3-5B82-4CB0-9F38-1AD0DB5D8738}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7026C0C3-5B82-4CB0-9F38-1AD0DB5D8738}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7026C0C3-5B82-4CB0-9F38-1AD0DB5D8738}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using P2005_Employee_Skills_Portal.Models;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 
 namespace P2005_Employee_Skills_Portal.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -23,6 +25,7 @@ namespace P2005_Employee_Skills_Portal.Controllers
             return View();
         }
 
+        [AllowAnonymous]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
