@@ -1,0 +1,615 @@
+﻿@{
+    ViewData["Title"] = "Staff Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<div class="control-section">
+    <ol class="breadcrumb" style="margin-top: 5px; width: 100%; background-color: aliceblue; color: black; font-family: Cambria; padding: 5px; font: bolder;">
+        <li class="breadcrumb-item active" style="margin-top: 5px; width: 100%; background-color: aliceblue; color: black; font-family: Cambria; padding: 5px; font:larger; font-size:large"> <stong>  View Staff Details </stong></li>
+    </ol>
+   
+    <ejs-grid id="Grid" rowHeight="40"
+              allowPaging="true" allowResizing="true" allowTextWrap="true" showColumnChooser="true" gridLines="Both" enableHeaderFocus="true" enableHover="false" excelExportComplete="excelExportComplete"
+              allowSorting="true" allowReordering="true" allowGrouping="true" 
+              toolbar="@(new List<string>() {"Add", "Search", "Edit", "Delete", "ExcelExport" ,"PdfExport", "CsvExport" , "ColumnChooser"})"
+              allowFiltering="true" allowSelection="true" allowExcelExport="true" allowPdfExport ="true"
+              toolbarClick="toolbarClick" actionComplete="onEdit" actionBegin="OnBegining">
+        <e-grid-searchSettings fields="@(new string[] {"FullNames", "IndexNumber", "Email","CurrentLocation",  "HighestLevelOfEducation", "DutyStation"})" operator="contains" ignoreCase="true"></e-grid-searchSettings>
+        <e-data-manager url="@Url.Action("GetStaffList", "Staff")" adaptor="UrlAdaptor"></e-data-manager>
+        <e-grid-pagesettings pageSize="5" pageSizes="true" pageCount="4" />
+        <e-grid-filterSettings type="Excel"></e-grid-filterSettings>
+        <e-grid-editSettings allowAdding="true" allowDeleting="true" allowEditing="true" mode="Dialog" template='#dialogtemplate'></e-grid-editSettings>
+        <e-grid-selectionsettings type="Single"></e-grid-selectionsettings>
+        <e-grid-columns>
+            <e-grid-column field="Id" visible="false" headerText="Staff ID" width="90" isPrimaryKey="true"></e-grid-column>
+            <e-grid-column field="IndexNumber" visible="true" headerText="Index Number" width="120"></e-grid-column>
+            <e-grid-column field="FullNames" headerText="Full Names" width="120" visible="true" ></e-grid-column>
+            <e-grid-column field="Email" headerText="Email" width="120" visible="true" ></e-grid-column>
+            <e-grid-column field="CurrentLocation" visible="true" headerText="Current Location"></e-grid-column>
+            <e-grid-column field="HighestLevelOfEducation" headerText="Highest Level Of Education"></e-grid-column>
+            <e-grid-column field="DutyStation" visible="true" width="150" headerText="Duty Station"></e-grid-column>
+        </e-grid-columns>
+    </ejs-grid>
+
+    <script id='dialogtemplate' type="text/x-template">
+        <div id="dialogTemp">
+        </div>
+    </script>
+
+    <script>
+        function toolbarClick(args) {
+            if (args.item.id == this.element.id + '_csvexport') {
+                this.csvExport();
+            }
+            if (args.item.id == this.element.id + '_excelexport') {
+                this.showSpinner();
+                this.excelExport();
+            }
+
+        }
+
+        function excelExportComplete(args) {
+            this.hideSpinner();
+        }
+        function csvExportComplete(args) {
+            this.hideSpinner();
+        }
+
+        function OnBegining(args) {
+            var grid = document.getElementsByClassName('e-grid')[0].ej2_instances[0]
+            // var grid = this;
+            if (args.requestType == 'delete') {
+                //debugger
+                grid.dataSource.dataSource.headers = [];
+                grid.dataSource.dataSource.headers.push({ 'XSRF-TOKEN': $("input:hidden[name='__RequestVerificationToken']").val(), "additional_key": args.data[0].Pid });
+            }
+
+            if (args.requestType == "delete") {
+                var deleteMessage = "\nRemove Record Alert !!! \n\nPlease confirm you would wish to Remove this record for project details with details below:  \n\n Grant Satrt Date:  " + formatdate(args.data[0].GrantStart) + " , \n\n  Name Of Operator:  " + args.data[0].Ptype + ", \n\nand  for Name of Complainant.:  " + args.data[0].Pcategory + " ."
+                if (confirm(deleteMessage)) {
+                    grid.refresh();
+                }
+                else
+                    args.cancel = true // if no the record wont delete
+            }
+
+            if (args.requestType == "save") {
+                
+            }
+            if ((args.requestType == "cancel") || (args.requestType === "refresh")) {
+
+            }
+        }
+
+        function onEdit(args) {
+            if (args.requestType == 'beginEdit' || args.requestType == 'add') {
+                window.requestType = args.requestType;
+                //debugger;
+                let spinner = ej.popups.createSpinner({ target: args.dialog.element });
+                // ej.popups.showSpinner(args.dialog.element);
+
+                //#####
+                var data = args.rowData;
+                window.args = args.requestType;
+
+                // For custom save button
+                args.dialog.btnObj[0].destroy();
+                args.dialog.btnObj[0].element.id = "save";
+
+                var progressSaveButton = new ejs.splitbuttons.ProgressButton({
+                    content: 'Save',
+                    enableProgress: true,
+                    animationSettings: { effect: 'SlideRight' },
+                    spinSettings: { position: 'Center' },
+                    cssClass: 'e-success',
+                }); progressSaveButton.appendTo('#save');
+
+                // For custom cancel button
+                args.dialog.btnObj[1].destroy();
+                args.dialog.btnObj[1].element.id = "cancel";
+
+                var progressCancelButton = new ejs.splitbuttons.ProgressButton({
+                    content: 'Cancel',
+                    enableProgress: true,
+                    animationSettings: { effect: 'SlideRight' },
+                    spinSettings: { position: 'Center' },
+                    cssClass: 'e-danger',
+
+                });
+                progressCancelButton.appendTo('#cancel');
+
+                //// saving the edit action
+                var savebtn = document.getElementById('savebtn');
+                if (savebtn == undefined) {
+                    $($("#save").hide()).after('<button id="savebtn" type="button" onclick="savess();" class="btn btn-success btn-sm" > Save Staff Record</button>');
+                }
+                // Cancelling the edit action
+                document.getElementById('cancel').addEventListener('click', function (args) {
+                    onclick = cancelss();
+
+                }.bind(this));
+
+                //#####
+
+                if (args.requestType == 'beginEdit') {
+                    //debugger;
+                    var grd = this;
+                    window.primaryKey = args.rowData.Pid;
+                    var ajax = new ej.base.Ajax({
+                        url: "@Url.Action("AddPartial", "Staff")", //render the partial view
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify({ value: args.rowData })
+                    });
+                    ajax.send().then(function (data) {
+                        //debugger;
+                        appendElement(data, args.form); //Render the edit form with selected record
+                        ej.popups.hideSpinner(args.dialog.element);
+                    }).catch(function (xhr) {
+                        //debugger;
+                        console.log(xhr);
+                        //console.log(data);
+                        ej.popups.hideSpinner(args.dialog.element);
+                    });
+                }
+                if (args.requestType == 'add') {
+                    //debugger;
+                    var ajax = new ej.base.Ajax({
+                        url: "@Url.Action("AddPartial", "Staff")", //render the partial view
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify({ value: args.rowData })
+                    });
+                    ajax.send().then(function (data) {
+                        //debugger;
+                        appendElement(data, args.form); //Render the edit form with selected record
+                        ej.popups.hideSpinner(args.dialog.element);
+                    }).catch(function (xhr) {
+                        //debugger;
+                        console.log(xhr);
+                        ej.popups.hideSpinner(args.dialog.element);
+                    });
+                }
+            }
+            else if (args.requestType == "save") {
+                var grid = document.getElementById("Grid").ej2_instances[0];
+                grid.refresh(); // refresh the Grid.
+            }
+            if (args.requestType == "save") {
+                var grid = document.getElementById("Grid").ej2_instances[0];
+                grid.refresh(); // refresh the Grid.
+            }
+        }
+
+
+        function appendElement(elementString, form) {
+            form.querySelector("#dialogTemp").innerHTML = elementString;
+            var script = document.createElement('script');
+            script.type = "text/javascript";
+            var serverScript = form.querySelector("#dialogTemp").querySelector('script');
+            script.textContent = serverScript.innerHTML;
+            document.head.appendChild(script);
+            serverScript.remove();
+        }
+
+    </script>
+
+    <style>
+        .control-section {
+            padding-left: 10px;
+        }
+
+        #target {
+            height: 100%;
+            min-height: 350px;
+        }
+
+        span.close-icon {
+            width: 24px;
+            height: 24px;
+            position: relative;
+            display: inline-block;
+        }
+
+        span.error-msg {
+            color: #66afe9;
+            display: inline-block;
+            position: relative;
+        }
+
+        .error-detail.col-lg-8 {
+            position: relative;
+            left: 45px;
+            margin: 20px 0px 21px;
+        }
+
+        .e-icons.close-icon.col-lg-2:before {
+            content: '\e7e9';
+            font-size: 26px;
+            color: #d9534f;
+            position: relative;
+            left: -12px;
+        }
+
+        .e-dialog .e-footer-content {
+            background-color: #f8f8f8;
+        }
+
+        .e-dialog.e-control.e-popup, .e-dialog.e-control.e-popup .e-dlg-header-content {
+            background-color: #d9edf7;
+        }
+
+        .e-dialog.e-control.e-popup {
+            padding: 3px;
+        }
+
+        .e-dialog.e-control .e-dlg-header-content {
+            padding: 10px;
+        }
+
+        .e-dialog.e-control .e-footer-content {
+            padding: 8px 12px;
+        }
+
+        .e-dialog.e-control .e-dlg-content {
+            padding: 15px 0px 0px;
+        }
+    </style>
+
+    <style>
+        #Grid_dialogEdit_wrapper {
+            min-height: 80%;
+            min-width: 80%;
+        }
+    </style>
+    <script>
+
+        function formatdate(value) {
+            var d = new Date(value);
+            var day = d.getDate();
+            var month = d.getMonth() + 1;
+            if (day < 10) {
+                day = "0" + day;
+            }
+            if (month < 10) {
+                month = "0" + month;
+            }
+            var year = d.getFullYear();
+            return day + '/' + month + '/' + year;
+        }
+
+        function formatTime(value) {
+            var _time = value.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
+            //console.log(_time);
+            return _time;
+        }
+    </script>
+
+    <script>
+        var div = document.getElementsByClassName('progress-text-align');
+        var progressLoad = function (args) {
+            var selectedTheme = location.hash.split('/')[1];
+            selectedTheme = selectedTheme ? selectedTheme : 'Material';
+            args.progressBar.theme = (selectedTheme.charAt(0).toUpperCase() +
+                selectedTheme.slice(1)).replace(/-dark/i, 'Dark').replace(/contrast/i, 'Contrast');
+            if (args.progressBar.theme === 'HighContrast') {
+                for (let i = 0; i < div.length; i++) {
+                    div[i].setAttribute('style', 'color:white');
+                }
+            }
+        };
+    </script>
+
+    <div class="form-row">
+        <div class="form-group col-md-3">
+        </div>
+
+        <div class="form-group col-md-7">
+            <div class="form-row" id="UploadProgress" hidden>
+                <div class="form-group col-md-1">
+                    <div id="rounded-container">
+                        <ejs-progressbar id="rounded-container"
+                                         type='Circular'
+                                         value=20
+                                         width='70px'
+                                         height='70px'
+                                         minimum="0"
+                                         maximum="100"
+                                         isIndeterminate=true
+                                         cornerRadius='Round'
+                                         load="progressLoad">
+                            <e-progressbar-animation enable=true duration=2000 delay=0></e-progressbar-animation>
+                        </ejs-progressbar>
+                    </div>
+                </div>
+                <div class="form-group col-md-9">
+                    <div class="progress-text-align" style="padding-top:10px; font:bolder; font-size:xx-large">Downloading the Manifest, please wait.....''</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <style>
+        .e-upload-actions {
+            visibility: hidden;
+        }
+
+        .control_wrapper {
+            max-width: 99%;
+            margin: auto;
+        }
+
+        .e-upload {
+            width: 100%;
+            position: relative;
+            margin-top: 15px;
+        }
+
+        .control_wrapper .e-upload .e-upload-drag-hover {
+            margin: 0;
+        }
+    </style>
+    <script>
+
+        function cancelss() {
+            var gridObj = this;// document.getElementById("Grid").ej2_instances[0];
+            gridObj.cancelEdit;
+            gridObj.refresh; // refresh the Grid.
+        }
+
+        function savess(args) {
+            //debugger;
+            //alert('reached here');
+            var grid = document.getElementById("Grid").ej2_instances[0];
+            grid.endEdit();
+            var NameOfOperator = document.getElementById("NameOfOperator").ej2_instances[0].value;
+            var NameComplainant = document.getElementById("NameComplainant").ej2_instances[0].value;
+            var OperatorBranch = $("#OperatorBranch").val(); //document.getElementById("OperatorBranch").ej2_instances[0].value;
+            var EmailComplainant = document.getElementById("EmailComplainant").ej2_instances[0].value;
+            var ComplaintDate = document.getElementById("ComplaintDate").ej2_instances[0].value;
+            var DateOfReceipt = document.getElementById("DateOfReceipt").ej2_instances[0].value;
+            var Address = document.getElementById("Address").ej2_instances[0].value;
+            var AmountsInvolved = document.getElementById("AmountsInvolved").ej2_instances[0].value;
+            var TelComplainant = document.getElementById("TelComplainant").ej2_instances[0].value;
+            var LocationComplainant = document.getElementById("LocationComplainant").ej2_instances[0].value;
+            var ComplaintDetails = document.getElementById("ComplaintDetails").ej2_instances[0].value;
+            var NatureOfComplaint = document.getElementById("NatureOfComplaint").ej2_instances[0].value;
+            //var ComplaintAttachmets = document.getElementById("ComplaintAttachmets").ej2_instances[0];//.value;
+            //var ResponseFromRespondent = document.getElementById("ResponseFromRespondent").ej2_instances[0];//.value;
+            var OperatorLocation = document.getElementById("OperatorLocation").ej2_instances[0].value;
+
+            //var RecommendedForEnforcement = document.getElementById("RecommendedForEnforcement").ej2_instances[0].value;
+            var YesRecommended = document.getElementById("YesRecommended").ej2_instances[0].checked;
+            var NoRecommended = document.getElementById("NoRecommended").ej2_instances[0].checked;
+
+            var Website = document.getElementById("Website").ej2_instances[0].value;
+            var TelComplainedAgaints = document.getElementById("TelComplainedAgaints").ej2_instances[0].value;
+            var EmailComplainedAgaints = document.getElementById("EmailComplainedAgaints").ej2_instances[0].value;
+
+
+            //var NatureOfComplaint1 = document.getElementById("NatureOfComplaint1").ej2_instances[0].value;
+            var ComplainedAgainstOperator = document.getElementById("ComplainedAgainstOperator").ej2_instances[0].value;
+            var ComplainedAgainst = document.getElementById("ComplainedAgainst").ej2_instances[0].value;
+            var ComplainantType = document.getElementById("ComplainantType").ej2_instances[0].value;
+
+            var ManagementComments = document.getElementById("ManagementComments").ej2_instances[0].value;
+            var SupervisorComments = document.getElementById("SupervisorComments").ej2_instances[0].value;
+
+            window.grdMain.editModule.batchSave();
+            window.grdActualStatus.editModule.batchSave();
+
+            var currentinfoStatus = window.grdMain.getBatchChanges();
+            currentinfoStatus = currentinfoStatus["changedRecords"];
+            currentinfoStatus = currentinfoStatus.map((value) => {
+                value["ResponseDate"] = value.ResponseDate.toJSON()
+                return value
+            })
+
+            var ActualStatus = window.grdActualStatus.getBatchChanges();
+            ActualStatus = ActualStatus["changedRecords"];
+            ActualStatus = ActualStatus.map((value) => {
+                value["StatusDate"] = value.StatusDate.toJSON(),
+                    value["ExpectedDate"] = value.ExpectedDate.toJSON()
+                return value
+            })
+            const entity = {
+                NameOfOperator: NameOfOperator,
+                OperatorBranch: OperatorBranch,
+                EmailComplainant: EmailComplainant,
+                NameComplainant: NameComplainant,
+                //ComplaintDate: formatdate(ComplaintDate),
+                //DateOfReceipt: formatdate(DateOfReceipt),
+                //NatureOfComplaint1: NatureOfComplaint1,
+                ComplainedAgainstOperator: ComplainedAgainstOperator,
+                ComplainantType: ComplainantType,
+                ComplainedAgainst: ComplainedAgainst,
+                Address: Address,
+                AmountsInvolved: AmountsInvolved,
+                TelComplainant: TelComplainant,
+                LocationComplainant: LocationComplainant,
+                ComplaintDetails: ComplaintDetails,
+                NatureOfComplaint: NatureOfComplaint,
+                //ComplainantCode: null,
+                ComplaintStatus: null,
+                OperatorLocation: OperatorLocation,
+                //ComplaintAttachmets: ComplaintAttachmets,
+                //ResponseFromRespondent: ResponseFromRespondent,
+                ActionTakenByLgrb: null,
+                ActionTakenByLgrbDate: null,
+                Resolution: null,
+                AddedBy: null,
+                DateEdited: null,
+                DateDeleted: null,
+                EditedBy: null,
+                DateDeleted: null,
+                DeleteStatus: null,
+                RecommendedForEnforcement: YesRecommended,
+                RecommendedForEnforcement: NoRecommended,
+                Website: Website,
+                TelComplainedAgaints: TelComplainedAgaints,
+                EmailComplainedAgaints: EmailComplainedAgaints,
+                ManagementComments: ManagementComments,
+                SupervisorComments: SupervisorComments,
+                CoreArbitrationStatuses: ActualStatus,
+                CoreArbitrationStatusResponses: currentinfoStatus,
+            }
+            //console.log(entity);
+
+            if (window.requestType == 'beginEdit') {
+                $.ajax({
+                    url: "@Url.Action("Edit", "Staff")?code=" + window.primaryKey + "&compDate=" + formatdate(ComplaintDate) + "&ReceiptDate=" + formatdate(DateOfReceipt),
+                    type: "POST",
+                    dataType: "json",
+                    data: entity,
+                    success: function (data) {
+                        //window.grd.endEdit();
+                        //window.grd.closeEdit();
+                        //window.grd.refresh();
+                        grid.closeEdit();
+                        grid.refresh();
+                    }
+                });
+            }
+            if (window.requestType == 'add') {
+                $.ajax({
+                    url: "@Url.Action("Save", "Staff")?compDate=" + formatdate(ComplaintDate) + "&ReceiptDate=" + formatdate(DateOfReceipt),
+                    type: "POST",
+                    dataType: "json",
+                    data: entity,
+                    success: function (data) {
+                        //window.grd.endEdit();
+                        //window.grd.closeEdit();
+                        //window.grd.refresh();
+                        grid.closeEdit();
+                        grid.refresh();
+                    }
+                });
+            }
+
+
+        }
+
+    </script>
+
+
+    <style>
+        .e-tab-section .e-tab .e-content.e-control {
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .e-content .e-item {
+            font-size: 10px;
+            margin: 10px;
+        }
+
+        #amount {
+            text-align: right;
+            font-size: 10px;
+            padding: 15px 0px;
+        }
+
+        #passenger-table th {
+            text-align: center;
+            font-size: 10px;
+            font-weight: 400;
+            border: 1px solid gainsboro;
+        }
+
+        #passenger-table td,
+        th {
+            padding: 10px;
+        }
+
+        #passenger-table td {
+            border: 1px solid gainsboro;
+        }
+
+        .name-header {
+            width: 200px;
+        }
+
+        .age-header {
+            width: 80px;
+        }
+
+        .gender-header {
+            width: 120px;
+        }
+
+        .type-header {
+            width: 150px;
+        }
+
+        .btn-container {
+            text-align: center;
+        }
+
+        .search-item {
+            padding-right: 50px;
+            padding-bottom: 20px;
+        }
+
+        .item-title {
+            font-weight: 500;
+            padding-top: 10px;
+        }
+
+        .responsive-align {
+            width: 75%;
+            margin: 0 auto;
+        }
+
+        .search-item {
+            padding: 0 0 20px 0;
+            width: 100%;
+        }
+
+
+        #err1,
+        #err2,
+        #err3 {
+            font-weight: bold;
+            color: red;
+            display: block;
+            margin-top: 15px;
+        }
+
+        .wizard-title {
+            font-size: 15px;
+        }
+
+        .e-tab-section {
+            padding: 0 15px;
+        }
+
+    </style>
+
+    <style>
+        body {
+            touch-action: none;
+        }
+
+        .e-success {
+            background-color: #22b24b !important;
+            color: white !important;
+            font: 900 !important;
+        }
+
+        .e-danger {
+            background-color: #d64113 !important;
+            color: white !important;
+            font: 900 !important;
+        }
+
+        .e-infoClass {
+            background-color: Highlight !important;
+            color: white !important;
+            font: 900 !important;
+        }
+    </style>
+  
+</div>
+

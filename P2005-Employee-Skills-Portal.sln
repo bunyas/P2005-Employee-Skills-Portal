@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35013.160
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2005-Employee-Skills-Portal", "P2005-Employee-Skills-Portal.csproj", "{5A196D8B-A40E-4270-9099-6C698EF24C9F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5A196D8B-A40E-4270-9099-6C698EF24C9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A196D8B-A40E-4270-9099-6C698EF24C9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A196D8B-A40E-4270-9099-6C698EF24C9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A196D8B-A40E-4270-9099-6C698EF24C9F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {17AD69A0-3C3A-4945-90E7-83FAD8597718}
+	EndGlobalSection
+EndGlobal
